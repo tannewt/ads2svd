@@ -1,4 +1,5 @@
-MAKEFLAGS += --jobs=$(shell nproc)
+PROCS =$(shell nproc)
+MAKEFLAGS += --jobs=$(PROCS)
 IN_DIR=in/Cores
 OUT_DIR=out
 IN_FILES=$(wildcard $(IN_DIR)/*.xml)
@@ -11,15 +12,16 @@ XLST_FILE=./ads2svd.xslt
 
 #$(info OUTFILES   $(OUT_FILES) )
 
-.PHONY: clean all 
-.SECONDARY: $(INTER_FILES)
+.PHONY: clean all
+#uncomment to keep the intermediate xml files
+#.SECONDARY: $(INTER_FILES)
 
 all: $(OUT_DIR) $(OUT_FILES)
 
 $(OUT_DIR)/%.xml : $(IN_DIR)/%.xml
 	./ads2svd.py -c ./in -i $<		
 
-$(OUT_DIR)/%.svd : $(OUT_DIR)/%.xml
+$(OUT_DIR)/%.svd : $(OUT_DIR)/%.xml $(XLST_FILE)
 	java -jar $(SAXONHE_PATH) -xsl:$(XLST_FILE) -s:$< -o:$@
 
 clean:
