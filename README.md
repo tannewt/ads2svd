@@ -1,6 +1,7 @@
 # ADS2SVD
 
-This turn the arm develloper studio xml corpus into a cmsis SVD format compliant description of all the ARM cores described in the ASD XML corpus (sw/debugger/configdb/Cores)
+This turn the arm develloper studio xml corpus into a cmsis SVD format compliant description of all the ARM cores described in the ASD XML corpus (sw/debugger/configdb/Cores).
+The main goal of the tool is to have the CORE peripherals and registers in an svd format. 
 
 ## Files
 * ads2svd.py :
@@ -9,11 +10,13 @@ This turn the arm develloper studio xml corpus into a cmsis SVD format compliant
 to apply with an xslt 2.0 processor (tested using saxonhe) on a ads2svd.py result xml to get a core svd
 * in : 
 the (corrected) infiles from arm develloper studio, this is all @ARM, some includes in the original ARM xml files were broken
-
+* Makefile :
+Do not forget to set the  path to saxon HE to a  valid path on your system
 
 ## CAVEAT EMPTOR
 * This is in devellopment
 * As long as the ARM Develloper Studio files are not correct in the source i cannot guarantee the completeness or accuracy of the generated SVDs
+* The current schema isn't supporting peripherals without base adresses and registers without offset. you've been warned
 * Features not implemented:
 ..* resets values : the data is abscent from ADS
 ..* Interrupts : it is debatable that the exceptions (NMI, HARDFAULT, etc...) are or are not interrupt fired by the core
