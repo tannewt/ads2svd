@@ -7,17 +7,17 @@
                 xmlns:tcf="http://com.arm.targetconfigurationeditor"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:internal="http://internal_functions"
-               
+
                 exclude-result-prefixes="c cr xi xsi tcf xsl tcf internal"
                 >
   <xsl:output method="xml" indent="yes" encoding="UTF-8"/>
   <xsl:preserve-space elements="*"/>
- 
+
   <xsl:template match="@* | node()"><xsl:copy><xsl:apply-templates select="@* | node()"/></xsl:copy></xsl:template>
 
-  
+
   <xsl:variable name="bitperbyte" select="8"/>
-  
+
   <xsl:variable name="hexlookup" select="tokenize('0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F',',')"/>
 
   <xsl:function name="internal:map_access">
@@ -34,10 +34,10 @@
       </xsl:when>
       <xsl:when test="$access='RMW'">
         <xsl:value-of select="'read-write'"/>
-      </xsl:when>      
-    </xsl:choose>       
+      </xsl:when>
+    </xsl:choose>
   </xsl:function>
-  
+
   <xsl:function name="internal:map_cpu_name">
     <xsl:param name="cpu_name"/>
     <xsl:choose>
@@ -50,13 +50,13 @@
     </xsl:choose>
   </xsl:function>
 
-  
+
   <xsl:function name="internal:strsplit">
     <xsl:param name="text"/>
     <el><xsl:value-of select="substring($text, 1, 1)"/></el>
     <xsl:if test="string-length($text) > 1">
       <xsl:copy-of select="internal:strsplit(substring($text, 2, string-length($text) - 1))"/>
-    </xsl:if>    
+    </xsl:if>
   </xsl:function>
 
   <xsl:function name="internal:lookup_position">
@@ -65,7 +65,7 @@
     <xsl:for-each select="$lut">
       <xsl:if test=".=$val">
         <el><xsl:value-of select="position()-1"/></el>
-      </xsl:if>    
+      </xsl:if>
     </xsl:for-each>
   </xsl:function>
 
@@ -76,13 +76,13 @@
       <xsl:variable name="locval" select="."/>
       <xsl:for-each select="$lut">
         <xsl:if test="position()-1=$locval">
-          
+
           <el><xsl:copy-of select="."/></el>
-        </xsl:if>    
+        </xsl:if>
       </xsl:for-each>
-    </xsl:for-each>    
+    </xsl:for-each>
   </xsl:function>
-  
+
   <xsl:function name="internal:lo_lookup_position">
     <xsl:param name="lut"/>
     <xsl:param name="val"/>
@@ -100,33 +100,33 @@
     </xsl:if>
   </xsl:function>
 
-  <xsl:function name="internal:dec2hex"> 
+  <xsl:function name="internal:dec2hex">
     <xsl:param name="val"/>
     <xsl:variable name="lo_hex_mods" select="reverse(internal:lo_num2base($val,16))"/>
-    <xsl:variable name="lo_hex" select="string-join(internal:lo_lookup_value($hexlookup,$lo_hex_mods),'')"/>    
+    <xsl:variable name="lo_hex" select="string-join(internal:lo_lookup_value($hexlookup,$lo_hex_mods),'')"/>
     <xsl:copy-of select="string-join(('0x',$lo_hex),'')"/>
   </xsl:function>
 
   <xsl:function name="internal:addbase">
     <xsl:param name="val"/>
     <xsl:param name="base"/>
-    <xsl:value-of select="    
+    <xsl:value-of select="
                           if (count($val) eq 0) then
                           0
                           else if (count($val) eq 1) then
                           $val[1]
                           else
                           $val[1] + $base * internal:addbase(subsequence($val, 2),$base)
-                          "/>    
-  </xsl:function>    
-  
+                          "/>
+  </xsl:function>
+
   <xsl:function name="internal:hex2dec">
     <xsl:param name="hexorig"/>
     <xsl:variable name="hex" select="reverse(internal:strsplit(upper-case(substring($hexorig,3))))"/>
     <xsl:variable name="res" select="internal:addbase(internal:lo_lookup_position($hexlookup,$hex),16)"/>
     <xsl:value-of select="$res"/>
   </xsl:function>
-  
+
   <xsl:function name="internal:peripheral_base_address">
     <xsl:param name="nodeset"/>
     <xsl:for-each select="$nodeset/@offset">
@@ -136,7 +136,7 @@
       </xsl:if>
     </xsl:for-each>
   </xsl:function>
-  
+
   <xsl:function name="internal:addressbloc_for">
     <xsl:param name="nodeset"/>
     <xsl:param name="adbtype"/>
@@ -155,7 +155,7 @@
     <usage>  <xsl:value-of select="$adbtype"/></usage>
   </xsl:function>
 
-  <xsl:function name="internal:sort" as="item()*">             
+  <xsl:function name="internal:sort" as="item()*">
     <xsl:param name="seq" as="item()*"/>
     <xsl:for-each select="$seq">
       <xsl:sort select="."/>
@@ -164,7 +164,7 @@
 
   </xsl:function>
 
-  <xsl:function name="internal:sortint" as="item()*">             
+  <xsl:function name="internal:sortint" as="item()*">
     <xsl:param name="seq"/>
     <xsl:for-each select="$seq">
       <xsl:sort select="." data-type="number"/>
@@ -173,13 +173,13 @@
 
   </xsl:function>
 
-  
+
   <xsl:function name="internal:definition_for">
     <xsl:param name="node"/>
     <xsl:for-each select="tokenize($node,'(\[|\])')">
       <xsl:if test="string-length(.) gt 0">
       <el>
-      <xsl:choose>     
+      <xsl:choose>
         <xsl:when test="contains(.,':')">
           <xsl:variable name="vals" select="internal:sortint(tokenize(.,':'))" />
           <bitOffset>
@@ -241,7 +241,7 @@
     </xsl:for-each>
   </xsl:function>
 
- 
+
   <xsl:function name="internal:max-byte-width" >
     <xsl:param name="doc"/>
     <xsl:param name="filter"/>
@@ -261,14 +261,14 @@
             <num><xsl:value-of select="."/></num>
           </xsl:if>
         </xsl:for-each>
-      </xsl:otherwise>         
+      </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
 
    <!--   <xsl:for-each select="internal:outfiles(internal:arches(//c:core_definition/c:reg_filter),document-uri(/),root())">
         <xsl:variable name="outfile" select="./outfile"/>
         <xsl:copy-of select="$outfile" />
-        <xsl:result-document href="{$outfile}"> 
+        <xsl:result-document href="{$outfile}">
         <xsl:for-each select="./doc"> -->
 
    <xsl:function name="internal:parse_corereg">
@@ -278,13 +278,13 @@
      <xsl:for-each select="$reg">
        <register>
          <xsl:variable name="rname" select="./cr:gui_name"/>
-         
+
          <xsl:choose>
            <xsl:when test="string-length(./cr:gui_name) lt 10 and string-length(./cr:gui_name) gt 0">
-             <name>   <xsl:value-of select="./cr:gui_name"/></name>   
+             <name>   <xsl:value-of select="./cr:gui_name"/></name>
            </xsl:when>
            <xsl:otherwise>
-             <name><xsl:value-of select="./@name"/></name>                 
+             <name><xsl:value-of select="./@name"/></name>
            </xsl:otherwise>
          </xsl:choose>                  
          <size><xsl:value-of select="internal:dec2hex(@size*$bitperbyte)"/></size>
@@ -354,7 +354,7 @@
                          <xsl:variable name="enumval" >
                            <xsl:value-of select="$enums[@name=$enumid][1]/@values"/>
                          </xsl:variable>
-                         <xsl:for-each select="tokenize($enumval,',')">                         
+                         <xsl:for-each select="tokenize($enumval,',')">
                               <xsl:variable name="enumitem" select="tokenize(.,'=')"/>
                                 <enumeratedValue>
                                   <name>
@@ -365,11 +365,11 @@
                                   </value>
                                 </enumeratedValue>
                          </xsl:for-each>
-                       </xsl:otherwise>                       
+                       </xsl:otherwise>
                      </xsl:choose>
                    </enumeratedValues>
                  </xsl:if>
-               </field>                          
+               </field>
              </xsl:for-each>
            </xsl:for-each>
          </fields>
@@ -382,7 +382,7 @@
      <xsl:for-each select="$node">
        <xsl:variable name="rlistname" select="@name"/>
        <xsl:variable name="enums" select="./tcf:enumeration"/>
-       <peripheral>               
+       <peripheral>
          <name><xsl:value-of select="@name"/></name>
          <description><xsl:value-of select="@name"/>, the registers are not accessed by address</description>
          <!-- <baseaddress>#FACADE</baseaddress> -->
@@ -402,8 +402,8 @@
        </peripheral>
      </xsl:for-each>
    </xsl:function>
-   
-   
+
+
    <xsl:function name="internal:parse_reglists">
      <xsl:param name="doc"/>
      <xsl:param name="filter"/>
@@ -413,16 +413,16 @@
            <xsl:for-each select=".//cr:register_list[@filter=$filter and not(.//cr:peripheral)]">
              <xsl:variable name="rlistname" select="@name"/>
              <xsl:copy-of select="internal:parse_reglist(.)"/>
-           </xsl:for-each>  
+           </xsl:for-each>
          </xsl:when>
          <xsl:otherwise>
            <xsl:for-each select=".//cr:register_list[not(.//cr:peripheral)]">
              <xsl:variable name="rlistname" select="@name"/>
              <xsl:copy-of select="internal:parse_reglist(.)"/>
-           </xsl:for-each>  
-         </xsl:otherwise>         
+           </xsl:for-each>
+         </xsl:otherwise>
        </xsl:choose>
-     </xsl:for-each>  
+     </xsl:for-each>
    </xsl:function>
 
    <xsl:function name="internal:doparse">
@@ -485,7 +485,7 @@
                 <xsl:variable name="pname" select="./@name"/>
                 <name>
                   <xsl:value-of select="./@name" />
-                </name>        
+                </name>
                 <description>
                   <xsl:value-of select="./cr:description" />
                 </description>
@@ -495,27 +495,27 @@
                   </groupName>
                 </xsl:if>
                 <baseAddress>
-                  <xsl:value-of select="$pbase" />             
+                  <xsl:value-of select="$pbase" />
                 </baseAddress>
                 <addressBlock>
-                  <xsl:copy-of select="internal:addressbloc_for(node(),'registers')" />     
-                </addressBlock>           
+                  <xsl:copy-of select="internal:addressbloc_for(node(),'registers')" />
+                </addressBlock>
                 <!-- TODO interrupts-->
                 <registers>
                   <xsl:for-each select="./cr:register">
                       <xsl:copy-of select="internal:parse_corereg(.,$pbase,$enums)"/>
                     <!-- <register>
                       <xsl:variable name="rname" select="@name"/>
-                      <name><xsl:value-of select="@name"/></name>                  
+                      <name><xsl:value-of select="@name"/></name>
                       <addressOffset><xsl:value-of select="internal:dec2hex(internal:hex2dec(@offset)-internal:hex2dec($pbase))"/></addressOffset>
-                      
+
                       <size><xsl:value-of select="internal:dec2hex(@size*$bitperbyte)"/></size>
                       <access>
-                        <xsl:value-of select="internal:map_access(@access)"/>                
-                      </access>                  
-                      
+                        <xsl:value-of select="internal:map_access(@access)"/>
+                      </access>
+
                       <fields>
-                        <xsl:for-each select="./cr:bitField">                          
+                        <xsl:for-each select="./cr:bitField">
                           <field>
                             <name><xsl:value-of select="@name"/></name>
                             <description>
@@ -528,20 +528,20 @@
                                 </xsl:otherwise>
                               </xsl:choose>
                             </description>
-                            <xsl:copy-of select="internal:definition_for(./cr:definition)"/>                            
-                          </field>                          
+                            <xsl:copy-of select="internal:definition_for(./cr:definition)"/>
+                          </field>
                         </xsl:for-each>
                       </fields>
                     </register> -->
-                  </xsl:for-each>              
-                </registers>                
+                  </xsl:for-each>
+                </registers>
               </peripheral>
-            </xsl:for-each>            
-          </peripherals>          
-        </device> 
+            </xsl:for-each>
+          </peripherals>
+        </device>
  </xsl:for-each>
  </xsl:function>
- 
+
  <xsl:template match="/">
    <xsl:choose>
      <xsl:when  test="boolean(//c:core_definition/c:reg_filter)">
@@ -550,7 +550,7 @@
 <!--         <xsl:copy-of select="./outfile"/> -->
          <xsl:result-document href="{$outfile}">
            <xsl:copy-of select="internal:doparse(./doc,./id)"/>
-         </xsl:result-document> 
+         </xsl:result-document>
        </xsl:for-each>
      </xsl:when>
      <xsl:otherwise>
