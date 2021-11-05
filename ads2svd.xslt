@@ -286,11 +286,17 @@
            <xsl:otherwise>
              <name><xsl:value-of select="./@name"/></name>
            </xsl:otherwise>
-         </xsl:choose>                  
-         <size><xsl:value-of select="internal:dec2hex(@size*$bitperbyte)"/></size>
-         <access>
-           <xsl:value-of select="internal:map_access(@access)"/>                
-         </access>
+         </xsl:choose>
+         <xsl:if test="string-length(./cr:gui_name) gt 0">
+          <displayName>
+            <xsl:value-of select="./cr:gui_name"/>
+          </displayName>
+         </xsl:if>
+         <xsl:if test="string-length(./cr:description) gt 0">
+          <description>
+            <xsl:value-of select="./cr:description"/>
+          </description>
+         </xsl:if>
          <xsl:choose>
            <xsl:when test="boolean(@offset)">
              <xsl:choose>
@@ -306,7 +312,12 @@
                  <!-- <addressOffset>#FACADE</addressOffset> -->
                </xsl:otherwise>
              </xsl:choose>
-             <fields>
+         <size><xsl:value-of select="@size*$bitperbyte"/></size>
+         <access>
+           <xsl:value-of select="internal:map_access(@access)"/>
+         </access>
+         <xsl:if test="boolean(./cr:bitField)">
+         <fields>
            <xsl:for-each select="./cr:bitField">
              <xsl:variable name="field" select="."/>
              <xsl:variable name="enumid" >
@@ -324,16 +335,18 @@
                      </xsl:otherwise>
                    </xsl:choose>
                  </name>
-                 <description>
-                   <xsl:choose>
-                     <xsl:when test="string-length($field/cr:description) lt 10">
-                       <xsl:value-of select="$field/cr:description"/>
-                     </xsl:when>
-                     <xsl:otherwise>
-                       <xsl:value-of select="$field/@name"/>
-                     </xsl:otherwise>
-                   </xsl:choose>
-                 </description>
+                 <xsl:if test="string-length($field/cr:description) gt 0">
+                   <description>
+                     <xsl:choose>
+                       <xsl:when test="string-length($field/cr:description) lt 10">
+                         <xsl:value-of select="$field/cr:description"/>
+                       </xsl:when>
+                       <xsl:otherwise>
+                         <xsl:value-of select="$field/@name"/>
+                       </xsl:otherwise>
+                     </xsl:choose>
+                   </description>
+                 </xsl:if>
                  <xsl:copy-of select="./*"/>
                  <xsl:if test="boolean($field[@enumerationId])">
                    <enumeratedValues>
@@ -344,6 +357,9 @@
                              <name>
                                <xsl:value-of select="@name"/>
                              </name>
+                             <description>
+                               <xsl:value-of select="@description"/>
+                             </description>
                              <value>
                                <xsl:value-of select="@number"/>
                              </value>
@@ -373,6 +389,7 @@
              </xsl:for-each>
            </xsl:for-each>
          </fields>
+         </xsl:if>
        </register>
      </xsl:for-each>
    </xsl:function>
@@ -472,12 +489,15 @@
             <vendorSystickConfig>true</vendorSystickConfig>
           </cpu>
           <addressUnitBits>8</addressUnitBits>
-          <width>         
+<!--
+          <width>
             <xsl:variable name="cpu-width" select="internal:max-byte-width($doc,$filter) * $bitperbyte" />
             <xsl:value-of select="$cpu-width" />
           </width>
+ -->
+          <width>32</width>
           <peripherals>
-          <xsl:copy-of select="internal:parse_reglists($doc,$filter)"/>
+            <!-- <xsl:copy-of select="internal:parse_reglists($doc,$filter)"/> -->
             <xsl:for-each select=".//cr:peripheral">
               <peripheral>
                 <xsl:variable name="enums" select="../tcf:enumeration"/>
