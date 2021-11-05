@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 
 import lxml
-from lxml import etree
+# from lxml import etree
+from xml.etree import ElementTree as etree
+from xml.etree import ElementInclude as EI
 import lxml.builder
 import os
 import sys
@@ -10,7 +12,7 @@ import copy
 import re
 import argparse
 
-rawparser = etree.XMLParser(remove_blank_text=True)
+rawparser = etree.XMLParser()#remove_blank_text=True)
 xmlparser=None
 config={}
 
@@ -48,7 +50,7 @@ def build_schema_wrapper():
     s  = etree.XMLSchema(etree.XML(ws))
     xmlparser = etree.XMLParser(remove_blank_text=True,schema =  s)
 
-def loadxml(p):
+def loadxml_orig(p):
 
     print(p)
     curr_path = os.path.sep.join(p.split(os.path.sep)[:-1])
@@ -74,6 +76,18 @@ def loadxml(p):
     out_file.write(etree.tostring(root, pretty_print=True).decode("utf8"))
     error_log.close()
     out_file.close()
+
+
+def include_loader(href, parse, encoding=None):
+    print(href)
+    return etree.ElementTree().parse(os.path.join("in", "Cores", href))
+
+def loadxml(p):
+    print(p)
+    root = etree.parse(p,xmlparser)
+    out_path = os.path.join(config["out_dir"] , p.split(os.path.sep)[-1])
+    EI.include(root, loader=include_loader)
+    root.write(out_path, encoding='utf-8', xml_declaration=True)
 
 def get_dev():
     error_log = open(config["xinclude_error_log"],"w+")
@@ -109,7 +123,7 @@ if(args.infile):
     args.all = False
  
 update_config(args)
-build_schema_wrapper()
+# build_schema_wrapper()
     
 if(args.all):
     get_all()
