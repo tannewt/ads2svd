@@ -18,11 +18,8 @@ XLST_FILE=./ads2svd.xslt
 
 all: $(OUT_DIR) $(OUT_FILES)
 
-$(OUT_DIR)/%.xml : $(IN_DIR)/%.xml
-	./ads2svd.py -c ./in -i $<		
-
-$(OUT_DIR)/%.svd : $(OUT_DIR)/%.xml $(XLST_FILE)
-	java -jar $(SAXONHE_PATH) -xsl:$(XLST_FILE) -s:$< -o:$@
+$(OUT_DIR)/%.svd : $(IN_DIR)/%.xml
+	python convert.py $< $@
 
 clean:
 	rm out/*
