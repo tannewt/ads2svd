@@ -152,6 +152,7 @@ for p in root.iter("{http://www.arm.com/core_reg}peripheral"):
         lines.extend(("        " + l for l in register_lines))
         offset = address - base_address
         lines.append(f"        <addressOffset>0x{offset}</addressOffset>")
+        lines.append(f"        <addressOffset>0x{offset:x}</addressOffset>")
         lines.append(f"      </register>")
     lines.append(f"    </registers>")
     lines.append(f"  </peripheral>")

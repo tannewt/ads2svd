@@ -16,6 +16,9 @@ XLST_FILE=./ads2svd.xslt
 #uncomment to keep the intermediate xml files
 .SECONDARY: $(INTER_FILES)
 
+$(OUT_DIR):
+	mkdir -p $@
+
 all: $(OUT_DIR) $(OUT_FILES)
 
 $(OUT_DIR)/%.svd : $(IN_DIR)/%.xml
